@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter } from '../init';
-import {inngest} from '@/inngest/client';
+import { inngest } from '@/inngest/client';
+import { messagesRouter } from '@/modules/messages/server/procedures';
 
 export const appRouter = createTRPCRouter({
   invoke: baseProcedure
@@ -16,7 +17,7 @@ export const appRouter = createTRPCRouter({
           value: input.value,
         },
       });
-      return { ok: "success" };
+      return { ok: 'success' };
     }),
   createAI: baseProcedure
     .input(
@@ -29,5 +30,13 @@ export const appRouter = createTRPCRouter({
       return { message: `AI created with text: ${input.text}` };
     }),
 });
-// export type definition of API
-export type AppRouter = typeof appRouter;
+
+// // export type definition of API
+// export type AppRouter = typeof appRouter;
+
+// export const mainRouter = createTRPCRouter({
+//   messages: messagesRouter,
+//   app: appRouter,
+// });
+
+// export type MainRouter = typeof mainRouter;

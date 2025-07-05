@@ -15,6 +15,37 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum MessageType {
+  RESULT
+  ERROR
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+model Message {
+  id         String       @id @default(uuid())
+  content    String
+  role       MessageRole
+  type       MessageType
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  fragment Fragment?
+}
+
+model Fragment {
+  id         String   @id @default(uuid())
+  messageId  String   @unique
+  message    Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  sandboxUrl String
+  title      String
+  files      Json
+}
+
 model User {
   id    Int     @id @default(autoincrement())
   email String  @unique
