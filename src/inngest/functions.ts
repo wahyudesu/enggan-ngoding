@@ -1,4 +1,4 @@
-import { Result, Sandbox } from '@e2b/code-interpreter';
+import Sandbox from '@e2b/code-interpreter';
 import {
   openai,
   createAgent,
@@ -7,8 +7,8 @@ import {
 } from '@inngest/agent-kit';
 
 import { inngest } from './client';
-import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import z from 'zod';
+import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { PROMPT } from '../../prompt/better-prompt';
 
 export const helloWorld = inngest.createFunction(
@@ -26,6 +26,8 @@ export const helloWorld = inngest.createFunction(
       system: PROMPT,
       model: openai({
         model: 'gpt-4o',
+        apiKey: process.env.OPENAI_API_KEY,
+        baseUrl: "https://ai.sumopod.com/v1",
         defaultParameters: {
           temperature: 0.1,
         },
@@ -37,11 +39,8 @@ export const helloWorld = inngest.createFunction(
           parameters: z.object({
             command: z.string(),
           }),
-          handler: async (
-            { command }: { command: string },
-            { step }: { step: any },
-          ) => {
-            return await step.run('terminal', async () => {
+          handler: async ({ command }, { step }) => {
+            return await step?.run('terminal', async () => {
               const buffers = { stdout: '', stderr: '' };
               try {
                 const sandbox = await getSandbox(sandboxId);
@@ -75,23 +74,26 @@ export const helloWorld = inngest.createFunction(
             ),
           }),
           handler: async (
-            { files }: { files: { path: string; content: string }[] },
-            { step, network }: { step: any; network: any },
+            { files },
+            { step, network },
           ) => {
-            return await step?.run('createOrUpdateFiles', async () => {
+            const newFiles = await step?.run('createOrUpdateFiles', async () => {
               try {
-                const updatedFiles = network.state.data.files || {};
+                const updatedFiles = network?.state.data.files || {};
                 const sandbox = await getSandbox(sandboxId);
                 for (const file of files) {
                   await sandbox.files.write(file.path, file.content);
                   updatedFiles[file.path] = file.content;
                 }
-                return Object.keys(updatedFiles);
+                return (updatedFiles);
               } catch (e) {
-                console.error(e);
-                return [];
+                return "Error: " + e;
               }
-            });
+            });;
+
+            if (typeof newFiles === 'object') {
+              network.state.data.files = newFiles
+            }
           },
         }),
         createTool({
@@ -107,7 +109,7 @@ export const helloWorld = inngest.createFunction(
                 const contents = [];
                 for (const file of files) {
                   const content = await sandbox.files.read(file);
-                  contents.push({ paht: file, content });
+                  contents.push({ path: file, content });
                 }
                 return JSON.stringify(contents);
               } catch (e) {
@@ -129,7 +131,7 @@ export const helloWorld = inngest.createFunction(
           }
 
           return result;
-        },
+        }
       },
     });
 

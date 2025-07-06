@@ -1,3 +1,7 @@
+ignoredBuiltDependencies:
+  - '@clerk/shared'
+  - inngest-cli
+
 onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'

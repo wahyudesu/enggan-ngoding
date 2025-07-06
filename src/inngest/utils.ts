@@ -1,13 +1,10 @@
 import Sandbox from '@e2b/code-interpreter';
+import { AgentResult, TextMessage } from '@inngest/agent-kit';
 
 export async function getSandbox(sandboxId: string) {
   const sandbox = await Sandbox.connect(sandboxId);
   return sandbox;
 }
-
-// Define AgentResult and TextMessage types if not already imported
-type TextMessage = { role: string; content: string | { text: string }[] };
-type AgentResult = { output: TextMessage[] };
 
 export function lastAssistantTextMessageContent(result: AgentResult) {
   const lastAssistantTextMessageIndex = result.output.findLastIndex(
