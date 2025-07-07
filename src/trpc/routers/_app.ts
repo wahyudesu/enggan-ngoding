@@ -7,16 +7,18 @@ export const appRouter = createTRPCRouter({
   invoke: baseProcedure
     .input(
       z.object({
-        value: z.string(),
+        value: z.any(),
       }),
     )
     .mutation(async ({ input }) => {
+      console.log('tRPC invoke called with input:', input);
       await inngest.send({
         name: 'test/hello.world',
         data: {
           value: input.value,
         },
       });
+
       return { ok: 'success' };
     }),
   createAI: baseProcedure
@@ -31,12 +33,11 @@ export const appRouter = createTRPCRouter({
     }),
 });
 
-// // export type definition of API
-// export type AppRouter = typeof appRouter;
+export type AppRouter = typeof appRouter;
 
-// export const mainRouter = createTRPCRouter({
-//   messages: messagesRouter,
-//   app: appRouter,
-// });
+export const mainRouter = createTRPCRouter({
+  messages: messagesRouter,
+  app: appRouter,
+});
 
-// export type MainRouter = typeof mainRouter;
+export type MainRouter = typeof mainRouter;

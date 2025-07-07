@@ -11,13 +11,13 @@ import { Input } from '@/components/ui/input';
 import { ArrowRight } from 'lucide-react';
 
 const Page = () => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
 
   const trpc = useTRPC();
   const invoke = useMutation(
     trpc.invoke.mutationOptions({
       onSuccess: () => {
-        toast.success('background gas started');
+        toast.success('background job has started');
       },
     }),
   );
@@ -34,12 +34,21 @@ const Page = () => {
               placeholder="Ask Lovable to create a landing page..."
               value={value}
               onChange={e => setValue(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !invoke.isPending && value.trim()) {
+                  console.log('Sending value:', value);
+                  invoke.mutate({ value: value });
+                }
+              }}
             />            
             <div className="flex items-center justify-end">
               <Button
                 className="w-10 h-10 rounded-full bg-[#666] text-white hover:bg-[#ff6f3c] border-none shadow-none p-0 flex items-center justify-center"
                 disabled={invoke.isPending}
-                onClick={() => invoke.mutate({ value: value })}
+                onClick={() => {
+                  console.log('Button clicked with value:', value);
+                  invoke.mutate({ value: value });
+                }}
                 aria-label="Send"
               >
                 <ArrowRight className="w-5 h-5" />
